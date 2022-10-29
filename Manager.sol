@@ -5,8 +5,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./NFTMinter.sol";
 
-contract ShippingContainer {
-
+contract Manager {
     using Counters for Counters.Counter;
 
     Counters.Counter private _shipmentID;
@@ -29,7 +28,7 @@ contract ShippingContainer {
 
     struct ContainerDetails {
         uint256 containerNFTId;
-        bytes32 containerId;
+        string containerId;
         // mapping(uint256 => address) shipments;
         // mapping(address => uint256) shipmentsNFTs;
         ShipmentState cStatus;
@@ -41,12 +40,12 @@ contract ShippingContainer {
     event ShipmentApproved(
         address requester,
         uint256 requestId,
-        bytes32 containerId
+        string containerId
     );
     event BoLIssuedAndStored(
         address shipper,
         uint256 shipmentId,
-        bytes32 _bolLink
+        string _bolLink
     );
     event ShipmentExportCleared(address shipper, uint256 shipmentId);
     event ShipmentImportCleared(address shipper, uint256 shipmentId);
@@ -54,15 +53,31 @@ contract ShippingContainer {
         address shipper,
         address _receiver,
         uint256 shipmentId,
-        bytes32 bolLink
+        string bolLink
     );
-    event ShipmentClaimApproved(address shipper, address _receiver, uint256 shipmentId);
+    event ShipmentClaimApproved(
+        address shipper,
+        address _receiver,
+        uint256 shipmentId
+    );
     event ShipmentDelivered(address shipper, uint256 shipmentId);
-    event DTDataStoredInIPFS(address shipper, uint256 shipmentId, string _dtData);
-    event DTApprovedAndCreated(address _invoker, address shipper, uint256 shipmentId);
+    event DTDataStoredInIPFS(
+        address shipper,
+        uint256 shipmentId,
+        string _dtData
+    );
+    event DTApprovedAndCreated(
+        address _invoker,
+        address shipper,
+        uint256 shipmentId
+    );
     event ChildNFTAdded(uint256 _shipmentNFTId);
     event ContainerMetadataUpdated(string _containerId);
-    event ContainerLoadedToVessel(address shipper, uint256 shipmentId, bytes32 _containerId);
+    event ContainerLoadedToVessel(
+        address shipper,
+        uint256 shipmentId,
+        string _containerId
+    );
 
     // address private contractOwner;
     address agent;
@@ -77,7 +92,7 @@ contract ShippingContainer {
     address designManager;
 
     constructor() {
-        companyAddr = msg.sender;  //0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C
+        companyAddr = msg.sender; //0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C
         agent = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
         designManager = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
         shipper = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
@@ -122,7 +137,7 @@ contract ShippingContainer {
         _;
     }
 
-    function setMinterContractAddr(address addr) public onlyCompany{
+    function setMinterContractAddr(address addr) public onlyCompany {
         minterContract = addr;
     }
 
@@ -138,15 +153,18 @@ contract ShippingContainer {
     function assignContainerId(
         address requester,
         uint256 requestID,
-        bytes32 _containerId,
-        bytes32 bol
+        string memory _containerId,
+        string memory bol
     ) public onlyAgent {
         shipment[requester][requestID].containerId = _containerId;
-        shipment[requester][requestID].cStatus = ShipmentState.ContainerIdAssigned;
+        shipment[requester][requestID].cStatus = ShipmentState
+            .ContainerIdAssigned;
 
         emit ShipmentApproved(requester, requestID, _containerId);
 
-        require(shipment[requester][requestID].cStatus == ShipmentState.ContainerIdAssigned,
+        require(
+            shipment[requester][requestID].cStatus ==
+                ShipmentState.ContainerIdAssigned,
             "Shipment is not approved!"
         );
 
@@ -158,22 +176,52 @@ contract ShippingContainer {
     This request can be submitted any time, before bol issuance or after, 
     and either by shipper or agent
     */
-    function createDTRequest(string memory _dtData, address _shipper, uint256 _shipmentId) public onlyMinter {
+    function createDTRequest(
+        string memory _dtData,
+        address _shipper,
+        uint256 _shipmentId
+    ) public onlyMinter {
         emit DTDataStoredInIPFS(_shipper, _shipmentId, _dtData);
     }
 
-    function approveDT(address _shipper, uint256 _shipmentId) public onlyDesignManager {
-        require(shipment[_shipper][_shipmentId].cStatus == ShipmentState.BoLIssued,
-            "Invalid Request, BoL not issued!");
+    function approveDT(address _shipper, uint256 _shipmentId)
+        public
+        onlyDesignManager
+    {
+        require(
+            shipment[_shipper][_shipmentId].cStatus == ShipmentState.BoLIssued,
+            "Invalid Request, BoL not issued!"
+        );
 
         shipment[_shipper][_shipmentId].cStatus = ShipmentState.DTCreated;
         emit DTApprovedAndCreated(msg.sender, _shipper, _shipmentId);
     }
 
-    function createContainerNFT(address _shipper, uint256 _shipmentId, string memory metadatauri
+    function exportCustomsClearance(address _shipper, uint256 _shipmentId)
+        public
+        onlyExportCustoms
+    {
+        require(
+            shipment[_shipper][_shipmentId].cStatus == ShipmentState.DTCreated,
+            "Shipment DT not approved"
+        );
+
+        shipment[_shipper][_shipmentId].cStatus = ShipmentState
+            .ExportCustomsCleared;
+
+        emit ShipmentExportCleared(_shipper, _shipmentId);
+    }
+
+    function createContainerNFT(
+        address _shipper,
+        uint256 _shipmentId,
+        string memory metadatauri
     ) public onlyAgent {
-        require(shipment[_shipper][_shipmentId].cStatus == ShipmentState.DTCreated,
-            "Shipment DT not approved");
+        require(
+            shipment[_shipper][_shipmentId].cStatus ==
+                ShipmentState.ExportCustomsCleared,
+            "Shipment not in Cleared for Export!"
+        );
 
         // shipment[_shipper][requestID].cStatus = ShipmentState.ContainerExportCleared;
 
@@ -183,53 +231,58 @@ contract ShippingContainer {
         shipment[_shipper][_shipmentId].cStatus = ShipmentState.NFTMinted;
     }
 
-    function exportHaulage(address _shipper, uint256 _shipmentId) public onlyTransporter {
-        require(shipment[_shipper][_shipmentId].cStatus == ShipmentState.NFTMinted,
-            "Shipment NFT not minted!"
+    function exportHaulage(address _shipper, uint256 _shipmentId)
+        public
+        onlyTransporter
+    {
+        require(
+            shipment[_shipper][_shipmentId].cStatus == ShipmentState.NFTMinted,
+            "Container Shipment NFT not minted!"
         );
         shipment[_shipper][_shipmentId].cStatus = ShipmentState.InExportHaulage;
     }
 
-     function exportCustomsClearance(
-        address _shipper, uint256 _shipmentId) public onlyExportCustoms {
+    function oceanHaulage(
+        address _shipper,
+        uint256 _shipmentId,
+        string memory _containerId
+    ) public onlyTransporter {
         require(
-            shipment[_shipper][_shipmentId].cStatus == ShipmentState.InExportHaulage,
-            "Shipment not in Export Haulage!");
-
-        shipment[_shipper][_shipmentId].cStatus = ShipmentState.ExportCustomsCleared;
-        
-        emit ShipmentExportCleared(_shipper, _shipmentId);
-    }
-
-    function oceanHaulage(address _shipper, uint256 _shipmentId, bytes32 _containerId) public onlyTransporter {
-        require(shipment[_shipper][_shipmentId].cStatus == ShipmentState.ExportCustomsCleared,
+            shipment[_shipper][_shipmentId].cStatus ==
+                ShipmentState.InExportHaulage,
             "Container not in Origin Port"
         );
         shipment[_shipper][_shipmentId].cStatus = ShipmentState.InOceanHaulage;
         emit ContainerLoadedToVessel(_shipper, _shipmentId, _containerId);
     }
 
-    function importCustomsClearance(
-        address _shipper,
-        uint256 _shipmentId
-    ) public onlyImportCustoms {
-        require( shipment[_shipper][_shipmentId].cStatus == ShipmentState.InOceanHaulage,
-            "Container not in Destination Port");
-        shipment[_shipper][_shipmentId].cStatus = ShipmentState.ImportCustomsCleared;
+    function importCustomsClearance(address _shipper, uint256 _shipmentId)
+        public
+        onlyImportCustoms
+    {
+        require(
+            shipment[_shipper][_shipmentId].cStatus ==
+                ShipmentState.InOceanHaulage,
+            "Container not in Destination Port"
+        );
+        shipment[_shipper][_shipmentId].cStatus = ShipmentState
+            .ImportCustomsCleared;
         emit ShipmentImportCleared(_shipper, _shipmentId);
     }
 
-     function claimShipment(
+    function claimShipment(
         address _shipper,
         uint256 _shipmentId,
-        bytes32 bolLink
+        string memory bolLink
     ) public onlyReceiver {
         require(
-            shipment[_shipper][_shipmentId].cStatus == ShipmentState.ImportCustomsCleared,
-            "Shipment not yet cleared for import!");
+            shipment[_shipper][_shipmentId].cStatus ==
+                ShipmentState.ImportCustomsCleared,
+            "Shipment not yet cleared for import!"
+        );
 
         shipment[_shipper][_shipmentId].cStatus = ShipmentState.Claimed;
-        emit ShipmentClaimed( _shipper, msg.sender, _shipmentId, bolLink);
+        emit ShipmentClaimed(_shipper, msg.sender, _shipmentId, bolLink);
     }
 
     function shipmentClaimApproval(address _shipper, uint256 _shipmentId)
@@ -245,9 +298,13 @@ contract ShippingContainer {
         emit ShipmentClaimApproved(_shipper, msg.sender, _shipmentId);
     }
 
-     function importHaulage(address _shipper, uint256 _requestID) public onlyTransporter {
+    function importHaulage(address _shipper, uint256 _requestID)
+        public
+        onlyTransporter
+    {
         require(
-            shipment[_shipper][_requestID].cStatus == ShipmentState.ClaimApproved,
+            shipment[_shipper][_requestID].cStatus ==
+                ShipmentState.ClaimApproved,
             "Shipment claim not approved!"
         );
         shipment[_shipper][_requestID].cStatus = ShipmentState.InImportHaulage;
@@ -255,7 +312,8 @@ contract ShippingContainer {
 
     function shipmentDeliveryConfirmation(address _shipper, uint256 _shipmentId)
         public
-        onlyReceiver {
+        onlyReceiver
+    {
         require(
             shipment[_shipper][_shipmentId].cStatus ==
                 ShipmentState.InImportHaulage
@@ -264,7 +322,6 @@ contract ShippingContainer {
 
         emit ShipmentDelivered(_shipper, _shipmentId);
     }
-    
 }
 
 /*
@@ -279,4 +336,3 @@ contract ShippingContainer {
     }
 
 */
-
