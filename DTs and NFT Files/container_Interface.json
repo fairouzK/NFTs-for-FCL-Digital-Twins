@@ -1,0 +1,36 @@
+{
+    "@id": "dtmi:com:shippingprocess:digitaltrip:trip:container;1",
+    "@type": "Interface",
+    "displayName": "Container - Interface Model",
+    "@context": "dtmi:dtdl:context;2",
+    "contents": [
+        {
+            "@type": "Property",
+            "name": "id",
+            "schema": "string",
+            "description": "Container identifier",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "origin_port",
+            "schema": "string",
+            "description": "Cargo Origin Port",
+            "writable": true
+        },
+        {
+            "@type": "Property",
+            "name": "destination_port",
+            "schema": "string",
+            "description": "Cargo Destination Port",
+            "writable": true
+        },
+        {
+            "@type": "Relationship",
+            "@id": "dtmi:com:shippingprocess:digitaltrip:trip:rel_has_content;1",
+            "name": "rel_has_content",
+            "displayName":"Has Content",
+            "target": "dtmi:com:shippingprocess:digitaltrip:trip:car;1"
+        }    
+    ]
+}

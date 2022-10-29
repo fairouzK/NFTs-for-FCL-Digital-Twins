@@ -1,0 +1,18 @@
+
+{
+    "container identifier": "MSKU 907032 3",
+    "Type": "FCL",
+    "Shipper": "Dailmer AG",
+    "shipment receiver": "John Doe",
+    "origin": "Shanghai, China",
+    "destination": "Dubai, UAE",
+    "content": "Car",
+    "Bill of Lading": "https://ipfs.io/ipfs/QmQzCX3kn5eP2gGWQ2h3EcGmdMs88zM22N2cwco6idfVrc?filename=bill%20of%20lading%2001.pdf",
+    "DTs data": "https://ipfs.io/ipfs/QmbDL9TqYCnW4pDrDmBMwFQe7aHwo1WbDy3KBgaGsdXLmk?filename=ExportedGraph_JohnDoe.json",
+    "DTs 3D Link": "https://explorer.digitaltwins.azure.net/3DScenes/?sceneId=3f5aeb1ca4546f175e89fe9b799249a2&selectedElementIds=aa9969909500868816d85eadfef03366&mode=Viewer&adtUrl=adt-ins.api.wcus.digitaltwins.azure.net&storageUrl=https%3A%2F%2Fcsb100320004fc8dfd0.blob.core.windows.net%2Fcargo&tid=08fe1c0a-19f5-4f24-a662-fdd5dd460025",
+    "Child NFT uri": "https://ipfs.io/ipfs/QmPdeTF2RYxH1zfrLcEMdBn65ZhK8qkWvYa2CjoZAm67ys?filename=nft-metadata-00.json",
+    "Child NFTID": "0"
+}
+
+
+
