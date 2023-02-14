@@ -220,7 +220,7 @@ contract Manager {
         require(
             shipment[_shipper][_shipmentId].cStatus ==
                 ShipmentState.ExportCustomsCleared,
-            "Shipment not in Cleared for Export!"
+            "Shipment not Cleared for Export!"
         );
 
         // shipment[_shipper][requestID].cStatus = ShipmentState.ContainerExportCleared;
