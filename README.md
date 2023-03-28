@@ -1,1 +1,9 @@
 # NFTs-for-FCL-Digital-Twins
+
+Published paper link: https://www.techrxiv.org/articles/preprint/NFTs_for_Trusted_Traceability_and_Management_of_Digital_Twins_for_Shipping_Containers/22211986
+
+The distribution, traceability, and management of shipping container logistics require secure data flow and trusted transactions. Digital Twins (DTs) can realize these features by offering shipping tracking and traceability, process flow and status monitoring, and management of the physical containers–all in a remote manner. However, the data of a DT itself is typically stored, controlled, and managed by a centralized entity, which is often the original creator of the physical container.
+Having a centralized entity can cause mistrust. The centralized entity may alter, tamper, or delete the digital twin data. To overcome this problem, this paper proposes trusted sharing and management of DTs for shipping containers by using NonFungible Tokens (NFTs). NFTs are digital tokens that hold unique data stored, controlled, and managed in a decentralized and immutable blockchain ledger. We extend in this paper the use of NFTs to tokenize shipping container DTs and their metadata. The proposed solution uses NFTs and Ethereum blockchain smart contracts to offer decentralization, security, transparency, traceability, and immutability to the data and processes involved in the creation, storage, and management of DTs of shipping containers. To demonstrate our solution, we create a DT of a shipping container using Microsoft Azure Digital Twins services and showed how to tokenize it using NFT. We assess the system using various test cases to evaluate its main functionalities. Furthermore, we analyze the cost of transactions and the security of the smart contracts code.
+
+3D modeling - Blender, <br>
+Digital twins - Microsoft Azure Digital Twins and Azure 3D Scenes.
